@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${APP_SECRET}
+    networks:
+      - umami
+      - traefik-public
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.twir-umami.rule=Host(`umami.twir.app`)
+        - traefik.http.routers.twir-umami.middlewares=admin-auth
+        - traefik.http.services.twir-umami.loadbalancer.server.port=3000
+        - traefik.docker.network=traefik-public
+
+
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - umami
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    
+
+volumes:
+  umami-db-data:
+
+networks:
+  umami:
+  traefik-public:
+    external: true
