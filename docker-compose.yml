@@ -21,7 +21,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.routers.twir-umami.rule=Host(`umami.twir.app`)
-        - traefik.http.routers.twir-umami.middlewares=admin-auth
+        # - traefik.http.routers.twir-umami.middlewares=admin-auth
         - traefik.http.services.twir-umami.loadbalancer.server.port=3000
         - traefik.docker.network=traefik-public
 
